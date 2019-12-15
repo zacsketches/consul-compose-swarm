@@ -1,0 +1,12 @@
+version: "3.7"
+
+services: 
+    webserver:
+        image: zacsketches/consul-example-webserver
+        ports: 
+            - "8080:8080"
+        networks: 
+            - example
+
+networks: 
+    example:
