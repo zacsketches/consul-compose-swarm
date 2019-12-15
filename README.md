@@ -1,20 +1,29 @@
 # Microservice Registry
 
+## Environment
 I run single node docker swarm for on-premises microservice deployments in 
-systems that not have a high availability requirement.  This allows us to use
-the benefits of DevOps for creating the microservices even though we are 
-not deploying to the cloud.  
+systems that do not have a high availability requirement.  This allows
+the benefits of DevOps for creating the microservices even though I'm deploying
+to a single server that is not in the cloud.  
 
 During the development process our team likes to use Docker compose invoked via
 `docker-compose up` to stand up the system for testing.  In deployment we prefer
 `docker stack deploy` in order to take advantage of service health monitoring 
-comes with docker swarm.
+that comes with docker swarm.
 
-Both swarm and compose offer a DNS service that supports inter-service
-communication.  However, there are subtle differences in the way the two systems
-create DNS names.  Compose appends `_1` to the end of each service name in the
-compose file and swarm does not append this suffix.  For example this snippet
-of a docker-compose.yml defines a service named `broker`.
+## Problem
+One of our developers reported that there is a service discovery problem when
+standing up a collection of services that is caused by naming convention 
+differences between swarm and compose. This repo attempts to recreate that 
+problem, but after testing with both compose and swarm **it appears that in both
+instances the webserver service can successfull connect** to the mongo database
+at the hostname `db` with the URI string `mongodb://db:27017`.
+
+Our team reported that both swarm and compose offer a DNS service that supports 
+inter-service communication.  However, there are subtle differences in the way 
+the two systems create DNS names.  Compose appends `_1` to the end of each 
+service name in the compose file and swarm does not append this suffix.  For 
+example, this snippet of a docker-compose.yml defines a service named `broker`.
 
 ``` docker
 version: '3.1'
@@ -39,7 +48,7 @@ If this service and the other services in the file were stood up using
 `docker stack deploy -c docker-compose.yml grace-v0` then the resulting
 DNS name for broker would be `gracev0_broker`.  
 
-**This is a problem** because it changes the DNS names hard 
+**This seemed to be a problem** because it changes the DNS names hard 
 coded into all of the other microservices.  The normal answer to avoid hard coding
 service DNS names is to provide a service registry in the system so that all of 
 the microservices look up the DNS names for servcies they want to communicate with
