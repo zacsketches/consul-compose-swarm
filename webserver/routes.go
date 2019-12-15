@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+	"os"
+
+	"github.com/gorilla/handlers"
 )
 
 const tpl = `<!DOCTYPE html>
@@ -25,7 +28,7 @@ const tpl = `<!DOCTYPE html>
 `
 
 func (s *server) routes() {
-	s.router.HandleFunc("/", s.handleRoot())
+	s.router.Handle("/", handlers.LoggingHandler(os.Stdout, s.handleRoot()))
 }
 
 func (s *server) handleRoot() http.HandlerFunc {
